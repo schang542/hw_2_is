@@ -116,7 +116,7 @@ class Lecture(models.Model):
     """
     lecture_id = models.BigAutoField(primary_key=True)
     course_id = models.ForeignKey(Course, on_delete=models.CASCADE)
-    date = models.DateField()
+    date = models.DateTimeField()
     qr_identifier = models.CharField(max_length=100)
 
 # ---------------------------------------------------------------------------
@@ -136,6 +136,7 @@ class QRCodeUpload(models.Model):
         uploading the QRCode
         lecture_id (nullable ForeignKey): An optional reference to the Lecture
         that the QRCode is being submitted to; if none given, set to NULL
+        image (FileField): The uploaded QR code image, saved to folder qr_codes
     """
     qrcode_id = models.BigAutoField(primary_key=True)
     student_id = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
@@ -145,6 +146,7 @@ class QRCodeUpload(models.Model):
         null=True,
         blank=True
     )
+    image = models.FileField(upload_to='qr_codes/')
 
 # ---------------------------------------------------------------------------
 # Helper / API functions

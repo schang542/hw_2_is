@@ -111,12 +111,12 @@ class Lecture(models.Model):
         lecture_id (int): 64-bit auto-incrementing primary key
         course_id (ForeignKey): A reference to the Course that the lecture is
         part of
-        date (datetime): Date of lecture
+        date (DateTimeField): Date of lecture
         qr_identifier (str): A single string identifying that Lecture's QR code
     """
     lecture_id = models.BigAutoField(primary_key=True)
     course_id = models.ForeignKey(Course, on_delete=models.CASCADE)
-    date = models.DateTimeField()
+    date = models.DateTimeField(auto_now_add=True)
     qr_identifier = models.CharField(max_length=100)
 
 # ---------------------------------------------------------------------------
@@ -137,6 +137,8 @@ class QRCodeUpload(models.Model):
         lecture_id (nullable ForeignKey): An optional reference to the Lecture
         that the QRCode is being submitted to; if none given, set to NULL
         image (FileField): The uploaded QR code image, saved to folder qr_codes
+        uploaded_at (DateTimeField): Date and time that QR code was uploaded,
+        to check that uploaded at same time as lecture
     """
     qrcode_id = models.BigAutoField(primary_key=True)
     student_id = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
@@ -147,6 +149,7 @@ class QRCodeUpload(models.Model):
         blank=True
     )
     image = models.FileField(upload_to='qr_codes/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
 
 # ---------------------------------------------------------------------------
 # Helper / API functions

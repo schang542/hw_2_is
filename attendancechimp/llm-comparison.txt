@@ -1,0 +1,16 @@
+The model that the LLM generated was much more complex/complete. The LLM assumed
+additional attributes for all classes, including first_name and last_name for
+both Instructors and Students as well date attributes such as enrolled_at in 
+Enrollment. Meanwhile, in the model I created, I adhered strictly to the 
+attributes explicitly defined in the homework, as I did not want to assume any
+incorrect attributes that would not end up being used in the following HW 
+assignments. The LLM model also included many helper functions and subclasses
+within each class, checking things like unique Course enrollment, and returning
+attributes such as the number of enrolled students and all QR uploads associated
+with a Lecture. For this reason, my model would be much easier to implement as 
+there are many less fields. However, it is important to note that I explicitly
+defined primary keys for every class using models.BigAutoField(primary_key=True),
+while the LLM model used the fact that Django will automatically create a id 
+column. Furthermore, the LLM model did not make the InstructorProfile and 
+StudentProfile DJango Users, removing any authentication requirements (which it
+moreso implemented itself in the helper functions).

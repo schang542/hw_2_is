@@ -56,7 +56,7 @@ def index(request):
 def sign_up(request):
     if request.method != 'GET':
         return HttpResponse(status=405)
-    return render(request, 'app/new.html')
+    return render(request, 'app/new')
 
 @csrf_exempt
 def createUser(request):

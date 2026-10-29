@@ -42,6 +42,9 @@ class InstructorProfile(models.Model):
         instructor_id (int): 64-bit auto-incrementing primary key
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    username = models.CharField(max_length=150, unique=True)
+    email = models.EmailField(max_length=254, unique=True)
+    password = models.CharField(max_length=128)
     instructor_id = models.BigAutoField(primary_key=True)
 
 class StudentProfile(models.Model):
@@ -55,6 +58,9 @@ class StudentProfile(models.Model):
         instructor_id (int): 64-bit auto-incrementing primary key
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    username = models.CharField(max_length=150, unique=True)
+    email = models.EmailField(max_length=254, unique=True)
+    password = models.CharField(max_length=128)
     student_id = models.BigAutoField(primary_key=True)
 
 # ---------------------------------------------------------------------------

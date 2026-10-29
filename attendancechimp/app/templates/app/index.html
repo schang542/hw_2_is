@@ -12,9 +12,34 @@
 <body>
 <div class="bio">
     <h1>AttendanceChimp</h1>
-    <p>Electronic class attendance tracking application.</p>
+    <p>AttendanceChimp is an electronic class attendance tracking application.</p>
     <hr>
-
+    <p>
+    {% if user.is_authenticated %}
+        <span class="username">{{ user.username }}</span>
+        <div style="height: 12px"></div>
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Log Out</button>
+        </form>
+    {% else %}
+        Not logged in.
+        <div style="height: 12px"></div>
+        If you already have an account:
+        <div style="height: 8px"></div>
+        <form action="{% url 'login' %}" method="get">
+            <button type="submit">Log In</button>
+        </form>
+        <div style="height: 12px"></div>
+        If you are a new user:
+        <div style="height: 8px"></div>
+        <form action="{% url 'sign_up' %}" method="get">
+            <button type="submit">Sign Up</button>
+        </form>
+    {% endif %}
+    </p>
+    <div style="height: 18px"></div>
+    <p>Current time (CST): {{current_time }}</p>
 </div>
 </body>
 </html>

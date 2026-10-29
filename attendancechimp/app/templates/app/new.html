@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign-Up Form</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 40px; }
+        .title { max-width: 600px; margin: 0 auto; }
+    </style>
+</head>
+<body>
+<div class="title">
+    <h1>Sign-Up Form</h1>
+</div>
+<div style="height: 24px;"></div>
+<form method="POST" action="/app/createUser">
+    {% csrf_token %}
+
+    <div>
+        <label for="user_name">Username:</label>
+        <input type="text" id="user_name" name="user_name" required>
+    </div>
+    <div style="height: 18px;"></div>
+    <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+    <div style="height: 18px;"></div>
+    <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+    <div style="height: 18px;"></div>
+    <div>
+        <p>Account type:</p>
+        <label>
+            <input type="radio" name="is_student" value="1" required>
+            Student
+        </label>
+        <label>
+            <input type="radio" name="is_student" value="0" required>
+            Instructor
+        </label>
+    </div>
+    <div style="height: 18px;"></div>
+    <button type="submit">Sign Up</button>
+</form>
+</body>
+</html>

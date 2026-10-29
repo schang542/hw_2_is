@@ -6,6 +6,6 @@ urlpatterns = [
     path('sum', views.sum_view, name='sum'),
     path("", views.index, name='home'),
     path('index.html', views.index, name='index_html'),
-    path('new.html', views.sign_up, name='sign_up'),
+    path('new', views.sign_up, name='sign_up'),
     path('createUser', views.createUser, name='createUser')
 ]

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create New Course</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 40px; }
+        .title { max-width: 600px; margin: 0 auto; }
+    </style>
+</head>
+<body>
+<div class="title">
+    <h1>Create New Course</h1>
+</div>
+<div style="height: 24px;"></div>
+<form method="POST" action="/app/createCourse">
+    {% csrf_token %}
+
+    <div>
+        <label for="course-name">Name of course:</label>
+        <input type="text" id="course-name" name="course-name" required>
+    </div>
+    <div style="height: 18px;"></div>
+    <div style="display: flex; justify-content: center; gap: 20px;">
+        <div>
+            <label for="start-time">Start time:</label>
+            <input type="time" id="start-time" name="start-time" required>
+        </div>
+        <div>
+            <label for="end-time">End time:</label>
+            <input type="time" id="end-time" name="end-time" required>
+        </div>
+    </div>
+    <div style="height: 18px;"></div>
+    <p style="font-weight: bold; font-size: 18px;">Course meeting schedule</p>
+    <fieldset>
+        <legend>Select one or more days:</legend>
+        <div>
+            <input type="checkbox" id="day-mon" name="day-mon" value="day-mon">
+            <label for="day-mon">Monday</label>
+        </div>
+        <div>
+            <input type="checkbox" id="day-tue" name="day-tue" value="day-tue">
+            <label for="day-tue">Tuesday</label>
+        </div>
+        <div>
+            <input type="checkbox" id="day-wed" name="day-wed" value="day-wed">
+            <label for="day-wed">Wednesday</label>
+        </div>
+        <div>
+            <input type="checkbox" id="day-thu" name="day-thu" value="day-thu">
+            <label for="day-thu">Thursday</label>
+        </div>
+        <div>
+            <input type="checkbox" id="day-fri" name="day-fri" value="day-fri">
+            <label for="day-fri">Friday</label>
+        </div>
+    </fieldset>
+    <div style="height: 18px;"></div>
+    <button type="submit">Create Course</button>
+</form>
+</body>
+</html>

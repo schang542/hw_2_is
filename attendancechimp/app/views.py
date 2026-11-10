@@ -16,7 +16,8 @@ import zoneinfo
 import json
 import io
 
-from .models import (InstructorProfile, StudentProfile)
+from .models import (InstructorProfile, StudentProfile, Course, Lecture,
+                    QRCodeUpload)
 # from .models import (InstructorProfile, StudentProfile, Course, Enrollment,
 #                      Lecture, QRCodeUpload, is_instructor, is_student,
 #                      getUploadsForCourse)
@@ -76,7 +77,7 @@ def createUser(request):
         email=email,
         password=password
     )
-    if user_type == 1:
+    if user_type == "1":
         StudentProfile.objects.create(
             user=new_user,
             username=user_name, 
@@ -95,8 +96,90 @@ def createUser(request):
 # ---------------------------------------------------------------------------
 # HW5  — courses, lectures, QR uploads, dump
 # ---------------------------------------------------------------------------
+def new_course(request):
+    if request.method != 'GET':
+        return HttpResponse(status=405)
+    if not hasattr(request.user, 'instructorprofile'):
+        return HttpResponse("Not logged in as instructor", status=401)
+    return render(request, 'app/new_course.html')
 
+@csrf_exempt
+def createCourse(request):
+    if request.method != 'POST':
+        return HttpResponse(status=405)
 
+    name = request.POST.get('course-name')
+    start = request.POST.get('start-time')
+    end = request.POST.get('end-time')
+    schedule = ','.join([
+        day for day in [
+            'day-mon',
+            'day-tue',
+            'day-wed',
+            'day-thu',
+            'day-fri'
+        ]
+        if request.POST.get('meeting-days')
+    ])
+
+    if Course.objects.filter(name=name).exists():
+        return HttpResponse("A course with this name already exists.", status=400)
+    
+    new_course = Course.objects.create(
+        name=name,
+        instructor_id=request.user.instructorprofile,
+        start_time=start,
+        end_time=end,
+        meeting_schedule=schedule
+    )
+    return HttpResponse("Successfully created new course", status=200)
+
+def new_lecture(request):
+    if request.method != 'GET':
+        return HttpResponse(status=405)
+    if not hasattr(request.user, 'instructorprofile'):
+        return HttpResponse("Not logged in as instructor", status=401)
+    return render(request, 'app/new_lecture.html')
+
+def createLecture(request):
+    if request.method != 'POST':
+        return HttpResponse(status=405)
+
+    course = request.POST.get('choice')
+    date = request.POST.get('date')
+    qr_id = request.POST.get('qr_id')
+
+    if Lecture.objects.filter(qr_identifier=qr_id).exists():
+        return HttpResponse("A lecture with this QR identifier already exists.", status=400)
+    
+    new_lecture = Lecture.objects.create(
+        course_id=Course.objects.get(name=course),
+        date=date,
+        qr_identifier=qr_id
+    )
+    return HttpResponse("Successfully created new lecture", status=200)
+
+def new_qr_upload(request):
+    if request.method != 'GET':
+        return HttpResponse(status=405)
+    if not hasattr(request.user, 'studentprofile'):
+        return HttpResponse("Not logged in as student", status=401)
+    return render(request, 'app/new_qr_upload.html')
+
+def createQRCodeUpload(request):
+    if request.method != 'POST':
+        return HttpResponse(status=405)
+
+    image = request.FILES.get('imageUpload')
+    qr_id = request.POST.get('qr_id')
+    
+    new_qr = QRCodeUpload.objects.create(
+        student_id=request.user.studentprofile,
+        qr_id=Lecture.objects.get(qr_identifier=qr_id),
+        image=image,
+        uploaded_at=datetime.now(CDT).strftime("%H:%M")
+    )
+    return HttpResponse("Successfully uploaded QR code", status=200)
 
 # ---------------------------------------------------------------------------
 # HW6  — getUploads

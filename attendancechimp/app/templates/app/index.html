@@ -17,7 +17,28 @@
     <p>
     {% if user.is_authenticated %}
         <span class="username">{{ user.username }}</span>
-        <div style="height: 12px"></div>
+        {% if user.instructorprofile %}
+            <span class="instructor">(Instructor)</span>
+            <div style="height:2px"></div>
+            <div style="display: flex; justify-content: center; gap: 12px;">
+                <form action="{% url 'new_course' %}" method="get">
+                    {% csrf_token %}
+                    <button type="submit">Create Course</button>
+                </form>
+                <form action="{% url 'new_lecture' %}" method="get">
+                    {% csrf_token %}
+                    <button type="submit">Create Lecture</button>
+                </form>
+            </div>
+        {% else %}
+            <span class="student">(Student)</span>
+            <div style="height:2px"></div>
+            <form action="{% url 'new_qr_upload' %}" method="get">
+                {% csrf_token %}
+                <button type="submit">Upload QR Code</button>
+            </form>
+        {% endif %}
+        <div style="height: 15px"></div>
         <form action="{% url 'logout' %}" method="post">
             {% csrf_token %}
             <button type="submit">Log Out</button>

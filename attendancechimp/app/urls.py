@@ -7,5 +7,11 @@ urlpatterns = [
     path("", views.index, name='home'),
     path('index.html', views.index, name='index_html'),
     path('new', views.sign_up, name='sign_up'),
-    path('createUser', views.createUser, name='createUser')
+    path('createUser', views.createUser, name='createUser'),
+    path('new_course', views.new_course, name='new_course'),
+    path('createCourse', views.createCourse, name='createCourse'),
+    path('new_lecture', views.new_lecture, name='new_lecture'),
+    path('createLecture', views.createLecture, name='createLecture'),
+    path('new_qr_upload', views.new_qr_upload, name='new_qr_upload'),
+    path('createQRCodeUpload', views.createQRCodeUpload, name='createQRCodeUpload')
 ]

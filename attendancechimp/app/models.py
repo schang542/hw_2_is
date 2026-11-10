@@ -78,12 +78,16 @@ class Course(models.Model):
         name (str): Name of course
         instructor_id (ForeignKey): A reference to the instructor who teaches 
         the course
-        meetingschedule (str): Course meeting schedule
+        meeting_schedule (str): Course meeting schedule
+        start_time (TimeField): Course start time
+        end_time (TimeField): Course end time
     """
     course_id = models.BigAutoField(primary_key=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     instructor_id = models.ForeignKey(InstructorProfile, on_delete=models.CASCADE)
     meeting_schedule = models.CharField(max_length=100)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
 
 # ---------------------------------------------------------------------------
 # Enrollment
@@ -123,7 +127,7 @@ class Lecture(models.Model):
     lecture_id = models.BigAutoField(primary_key=True)
     course_id = models.ForeignKey(Course, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
-    qr_identifier = models.CharField(max_length=100)
+    qr_identifier = models.CharField(max_length=100, unique=True)
 
 # ---------------------------------------------------------------------------
 # QR Code Upload

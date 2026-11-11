@@ -99,14 +99,14 @@ def createUser(request):
 def new_course(request):
     if request.method != 'GET':
         return HttpResponse(status=405)
-    if not hasattr(request.user, 'instructorprofile'):
-        return HttpResponse("Not logged in as instructor", status=401)
     return render(request, 'app/new_course.html')
 
 @csrf_exempt
 def createCourse(request):
     if request.method != 'POST':
         return HttpResponse(status=405)
+    if not hasattr(request.user, 'instructorprofile'):
+        return HttpResponse("Not logged in as instructor", status=401)
 
     name = request.POST.get('course-name')
     start = request.POST.get('start-time')
@@ -119,7 +119,7 @@ def createCourse(request):
             'day-thu',
             'day-fri'
         ]
-        if request.POST.get('meeting-days')
+        if request.POST.get(day)
     ])
 
     if Course.objects.filter(name=name).exists():
@@ -141,6 +141,7 @@ def new_lecture(request):
         return HttpResponse("Not logged in as instructor", status=401)
     return render(request, 'app/new_lecture.html')
 
+@csrf_exempt
 def createLecture(request):
     if request.method != 'POST':
         return HttpResponse(status=405)
@@ -162,13 +163,14 @@ def createLecture(request):
 def new_qr_upload(request):
     if request.method != 'GET':
         return HttpResponse(status=405)
-    if not hasattr(request.user, 'studentprofile'):
-        return HttpResponse("Not logged in as student", status=401)
     return render(request, 'app/new_qr_upload.html')
 
+@csrf_exempt
 def createQRCodeUpload(request):
     if request.method != 'POST':
         return HttpResponse(status=405)
+    if not hasattr(request.user, 'studentprofile'):
+        return HttpResponse("Not logged in as student", status=401)
 
     image = request.FILES.get('imageUpload')
     qr_id = request.POST.get('qr_id')
@@ -176,8 +178,7 @@ def createQRCodeUpload(request):
     new_qr = QRCodeUpload.objects.create(
         student_id=request.user.studentprofile,
         lecture_id=Lecture.objects.get(qr_identifier=qr_id),
-        image=image,
-        uploaded_at=datetime.now(CDT).strftime("%H:%M")
+        image=image
     )
     return HttpResponse("Successfully uploaded QR code", status=200)
 
@@ -191,7 +192,7 @@ def dumpUploads(request):
     for upload in qs:
         combined.append({
             'username': upload.student_id.username,
-            'upload_time': upload.uploaded_at
+            'upload_time': upload.uploaded_at.strftime('%Y-%m-%d %H:%M:%S')
         })
     return JsonResponse(combined, safe=False)
 

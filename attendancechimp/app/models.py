@@ -86,8 +86,8 @@ class Course(models.Model):
     name = models.CharField(max_length=100, unique=True)
     instructor_id = models.ForeignKey(InstructorProfile, on_delete=models.CASCADE)
     meeting_schedule = models.CharField(max_length=100)
-    start_time = models.TimeField()
-    end_time = models.TimeField()
+    start_time = models.TimeField(null=True, blank=True)
+    end_time = models.TimeField(null=True, blank=True)
 
 # ---------------------------------------------------------------------------
 # Enrollment

@@ -15,6 +15,7 @@ from datetime import datetime
 import zoneinfo
 import json
 import io
+import uuid
 
 from .models import (InstructorProfile, StudentProfile, Course, Lecture,
                     QRCodeUpload)
@@ -99,6 +100,8 @@ def createUser(request):
 def new_course(request):
     if request.method != 'GET':
         return HttpResponse(status=405)
+    if not hasattr(request.user, 'instructorprofile'):
+        return HttpResponse("Not logged in as instructor", status=401)
     return render(request, 'app/new_course.html')
 
 @csrf_exempt
@@ -125,7 +128,7 @@ def createCourse(request):
     if Course.objects.filter(name=name).exists():
         return HttpResponse("A course with this name already exists.", status=400)
     
-    new_course = Course.objects.create(
+    Course.objects.create(
         name=name,
         instructor_id=request.user.instructorprofile,
         start_time=start,
@@ -145,17 +148,18 @@ def new_lecture(request):
 def createLecture(request):
     if request.method != 'POST':
         return HttpResponse(status=405)
+    if not hasattr(request.user, 'instructorprofile'):
+        return HttpResponse("Not logged in as instructor", status=401)
 
     course = request.POST.get('choice')
-    date = request.POST.get('date')
-    qr_id = request.POST.get('qr_id')
 
-    if Lecture.objects.filter(qr_identifier=qr_id).exists():
-        return HttpResponse("A lecture with this QR identifier already exists.", status=400)
+    if not Course.objects.get(name=course, instructor_id=request.user.instructorprofile):
+        return HttpResponse("No course with this name exists", status=400)
     
-    new_lecture = Lecture.objects.create(
+    qr_id = str(uuid.uuid4())
+    
+    Lecture.objects.create(
         course_id=Course.objects.get(name=course),
-        date=date,
         qr_identifier=qr_id
     )
     return HttpResponse("Successfully created new lecture", status=200)
@@ -163,6 +167,8 @@ def createLecture(request):
 def new_qr_upload(request):
     if request.method != 'GET':
         return HttpResponse(status=405)
+    if not hasattr(request.user, 'studentprofile'):
+        return HttpResponse("Not logged in as student", status=401)
     return render(request, 'app/new_qr_upload.html')
 
 @csrf_exempt
@@ -174,10 +180,13 @@ def createQRCodeUpload(request):
 
     image = request.FILES.get('imageUpload')
     qr_id = request.POST.get('qr_id')
+    lecture = None
+    if qr_id:
+        lecture = Lecture.objects.filter(qr_identifier=qr_id).first()
     
-    new_qr = QRCodeUpload.objects.create(
+    QRCodeUpload.objects.create(
         student_id=request.user.studentprofile,
-        lecture_id=Lecture.objects.get(qr_identifier=qr_id),
+        lecture_id=lecture,
         image=image
     )
     return HttpResponse("Successfully uploaded QR code", status=200)

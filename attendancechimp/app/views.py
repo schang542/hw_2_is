@@ -175,11 +175,25 @@ def createQRCodeUpload(request):
     
     new_qr = QRCodeUpload.objects.create(
         student_id=request.user.studentprofile,
-        qr_id=Lecture.objects.get(qr_identifier=qr_id),
+        lecture_id=Lecture.objects.get(qr_identifier=qr_id),
         image=image,
         uploaded_at=datetime.now(CDT).strftime("%H:%M")
     )
     return HttpResponse("Successfully uploaded QR code", status=200)
+
+def dumpUploads(request):
+    if request.method != 'GET':
+        return HttpResponse(status=405)
+    if not hasattr(request.user, 'instructorprofile'):
+        return HttpResponse("Not logged in as instructor", status=401)
+    qs = QRCodeUpload.objects.select_related('student_id')
+    combined = []
+    for upload in qs:
+        combined.append({
+            'username': upload.student_id.username,
+            'upload_time': upload.uploaded_at
+        })
+    return JsonResponse(combined, safe=False)
 
 # ---------------------------------------------------------------------------
 # HW6  — getUploads

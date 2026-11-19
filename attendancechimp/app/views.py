@@ -115,6 +115,8 @@ def createCourse(request):
 
     if Course.objects.filter(name=name).exists():
         return HttpResponse("A course with this name already exists.", status=400)
+    if Course.objects.filter(number=number).exists():
+        return HttpResponse("A course with this number already exists.", status=400)
     
     Course.objects.create(
         name=name,
@@ -146,7 +148,7 @@ def createLecture(request):
 
     course = request.POST.get('choice')
 
-    if not Course.objects.get(name=course, instructor_id=request.user.instructorprofile):
+    if not Course.objects.get(name=course, instructor=request.user.instructorprofile):
         return HttpResponse("No course with this name exists", status=400)
     
     qr_id = str(uuid.uuid4())

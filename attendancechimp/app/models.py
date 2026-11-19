@@ -27,6 +27,9 @@ logger = logging.getLogger(__name__) # set up tracking, auditing, and debugging
                                                                # allows using logger.warning(), logger.error(), 
                                                                # logger.info(), etc. Better than print() for debuggin... 
 
+# for getUploadsForCourse()
+import zoneinfo
+CDT = zoneinfo.ZoneInfo("America/Chicago")
 
 # ---------------------------------------------------------------------------
 # User profiles
@@ -78,16 +81,30 @@ class Course(models.Model):
         name (str): Name of course
         instructor_id (ForeignKey): A reference to the instructor who teaches 
         the course
-        meeting_schedule (str): Course meeting schedule
+        day_mon-day_fri (bool): A boolean value for each meeting day; True if
+        meeting that day, False if not, and defaults to False
         start_time (TimeField): Course start time
         end_time (TimeField): Course end time
     """
     course_id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
-    instructor_id = models.ForeignKey(InstructorProfile, on_delete=models.CASCADE)
-    meeting_schedule = models.CharField(max_length=100)
+    number = models.CharField(max_length=50, unique=True)
+    instructor = models.ForeignKey(InstructorProfile, on_delete=models.CASCADE)
+    day_mon = models.BooleanField(default=False)
+    day_tue = models.BooleanField(default=False)
+    day_wed = models.BooleanField(default=False)
+    day_thu = models.BooleanField(default=False)
+    day_fri = models.BooleanField(default=False)
     start_time = models.TimeField(null=True, blank=True)
     end_time = models.TimeField(null=True, blank=True)
+
+    # Method to check whether Course meets on a certain day
+    def meets_on_day(self, weekday):
+        return ((weekday == 0 and self.day_mon) or
+        (weekday == 1 and self.day_tue) or
+        (weekday == 2 and self.day_wed) or
+        (weekday == 3 and self.day_thu) or
+        (weekday == 4 and self.day_fri))
 
 # ---------------------------------------------------------------------------
 # Enrollment
@@ -105,8 +122,8 @@ class Enrollment(models.Model):
         course_id (ForeignKey): a reference to the course that has the student
     """
     enrollment_id = models.BigAutoField(primary_key=True)
-    student_id = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
-    course_id = models.ForeignKey(Course, on_delete=models.CASCADE)
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
 
 # ---------------------------------------------------------------------------
 # Lecture
@@ -125,7 +142,7 @@ class Lecture(models.Model):
         qr_identifier (str): A single string identifying that Lecture's QR code
     """
     lecture_id = models.BigAutoField(primary_key=True)
-    course_id = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
     qr_identifier = models.CharField(max_length=100, unique=True)
 
@@ -151,8 +168,8 @@ class QRCodeUpload(models.Model):
         to check that uploaded at same time as lecture
     """
     qrcode_id = models.BigAutoField(primary_key=True)
-    student_id = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
-    lecture_id = models.ForeignKey(
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
+    lecture = models.ForeignKey(
         Lecture,
         on_delete=models.SET_NULL,
         null=True,
@@ -173,5 +190,25 @@ def get_username(user):
         print(user.get_username())
     else:
         print("User not found")
+
+def getUploadsForCourse(course):
+    try:
+        full_course = Course.objects.get(number=course)
+    except Course.DoesNotExist:
+        return []
+
+    all_uploads = QRCodeUpload.objects.filter(
+        lecture__course__number=course
+    )
+
+    valid_uploads = []
+    for upload in all_uploads:
+        timezone = upload.uploaded_at.astimezone(CDT)
+        day = timezone.weekday()
+        time = timezone.time()
+        if (full_course.meets_on_day(day) 
+        and full_course.start_time <= time <= full_course.end_time):
+            valid_uploads.append(upload)
+    return valid_uploads
 
 

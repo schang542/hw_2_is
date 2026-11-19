@@ -17,8 +17,13 @@
     {% csrf_token %}
 
     <div>
-        <label for="course-name">Name of course:</label>
+        <label for="course-name">Course name:</label>
         <input type="text" id="course-name" name="course-name" required>
+    </div>
+    <div style="height: 18px;"></div>
+    <div>
+        <label for="course-number">Course number:</label>
+        <input type="text" id="course-number" name="course-number" required>
     </div>
     <div style="height: 18px;"></div>
     <div style="display: flex; justify-content: center; gap: 20px;">

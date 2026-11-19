@@ -18,10 +18,7 @@ import io
 import uuid
 
 from .models import (InstructorProfile, StudentProfile, Course, Lecture,
-                    QRCodeUpload)
-# from .models import (InstructorProfile, StudentProfile, Course, Enrollment,
-#                      Lecture, QRCodeUpload, is_instructor, is_student,
-#                      getUploadsForCourse)
+                    QRCodeUpload, getUploadsForCourse)
 
 CDT = zoneinfo.ZoneInfo("America/Chicago")
 
@@ -112,28 +109,24 @@ def createCourse(request):
         return HttpResponse("Not logged in as instructor", status=401)
 
     name = request.POST.get('course-name')
+    number = request.POST.get('course-number')
     start = request.POST.get('start-time')
     end = request.POST.get('end-time')
-    schedule = ','.join([
-        day for day in [
-            'day-mon',
-            'day-tue',
-            'day-wed',
-            'day-thu',
-            'day-fri'
-        ]
-        if request.POST.get(day)
-    ])
 
     if Course.objects.filter(name=name).exists():
         return HttpResponse("A course with this name already exists.", status=400)
     
     Course.objects.create(
         name=name,
-        instructor_id=request.user.instructorprofile,
+        number=number,
+        instructor=request.user.instructorprofile,
         start_time=start,
         end_time=end,
-        meeting_schedule=schedule
+        day_mon='day-mon' in request.POST,
+        day_tue='day-tue' in request.POST,
+        day_wed='day-wed' in request.POST,
+        day_thu='day-thu' in request.POST,
+        day_fri='day-fri' in request.POST
     )
     return HttpResponse("Successfully created new course", status=200)
 
@@ -159,7 +152,7 @@ def createLecture(request):
     qr_id = str(uuid.uuid4())
     
     Lecture.objects.create(
-        course_id=Course.objects.get(name=course),
+        course=Course.objects.get(name=course),
         qr_identifier=qr_id
     )
     return HttpResponse("Successfully created new lecture", status=200)
@@ -185,8 +178,8 @@ def createQRCodeUpload(request):
         lecture = Lecture.objects.filter(qr_identifier=qr_id).first()
     
     QRCodeUpload.objects.create(
-        student_id=request.user.studentprofile,
-        lecture_id=lecture,
+        student=request.user.studentprofile,
+        lecture=lecture,
         image=image
     )
     return HttpResponse("Successfully uploaded QR code", status=200)
@@ -208,6 +201,22 @@ def dumpUploads(request):
 # ---------------------------------------------------------------------------
 # HW6  — getUploads
 # ---------------------------------------------------------------------------
+def getUploads(request):
+    if request.method != 'GET':
+        return HttpResponse(status=405)
+    if not hasattr(request.user, 'instructorprofile'):
+        return HttpResponse("Not logged in as instructor", status=401)
 
+    course = request.GET.get('course')
+    if not course:
+        return JsonResponse({"error": "Missing course parameter"}, status=400)
+
+    uploads = getUploadsForCourse(course)
+    upload_dicts = []
+    for upload in uploads:
+        username = upload.student.username
+        upload_time = upload.uploaded_at.strftime("%Y-%m-%d %H:%M:%S")
+        upload_dicts.append({"username": username, "upload_time": upload_time})
+    return JsonResponse(upload_dicts, safe=False)
 
 

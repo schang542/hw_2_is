@@ -109,18 +109,14 @@ def createCourse(request):
         return HttpResponse("Not logged in as instructor", status=401)
 
     name = request.POST.get('course-name')
-    number = request.POST.get('course-number')
     start = request.POST.get('start-time')
     end = request.POST.get('end-time')
 
     if Course.objects.filter(name=name).exists():
         return HttpResponse("A course with this name already exists.", status=400)
-    if Course.objects.filter(number=number).exists():
-        return HttpResponse("A course with this number already exists.", status=400)
     
     Course.objects.create(
         name=name,
-        number=number,
         instructor=request.user.instructorprofile,
         start_time=start,
         end_time=end,

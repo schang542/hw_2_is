@@ -88,7 +88,6 @@ class Course(models.Model):
     """
     course_id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
-    number = models.CharField(max_length=50, unique=True)
     instructor = models.ForeignKey(InstructorProfile, on_delete=models.CASCADE)
     day_mon = models.BooleanField(default=False)
     day_tue = models.BooleanField(default=False)
@@ -193,12 +192,12 @@ def get_username(user):
 
 def getUploadsForCourse(course):
     try:
-        full_course = Course.objects.get(number=course)
+        full_course = Course.objects.get(name=course)
     except Course.DoesNotExist:
         return []
 
     all_uploads = QRCodeUpload.objects.filter(
-        lecture__course__number=course
+        lecture__course__name=course
     )
 
     valid_uploads = []
